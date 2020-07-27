@@ -28,5 +28,8 @@
     "playlist"
   ],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "engines":{
+    "node": "v12.18.3"
+  }
 }
