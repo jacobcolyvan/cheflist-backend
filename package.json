@@ -11,10 +11,10 @@
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.9.24",
     "request": "^2.88.2",
-    "spotify-web-api-node": "^4.0.0"
+    "spotify-web-api-node": "^4.0.0",
+    "cors": "^2.8.5"
   },
   "devDependencies": {
-    "cors": "^2.8.5",
     "nodemon": "^2.0.4"
   },
   "scripts": {
