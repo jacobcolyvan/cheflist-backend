@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const request = require('request');
-// const axios = require('axios');
 const auth = require('../middleware/auth');
 const userModel = require('../models/user');
 
@@ -28,9 +27,6 @@ router.post('/spotify/callback', auth, async (req, res) => {
     };
 
     request.post(authOptions, async function (error, response, body) {
-      console.log('–––');
-      console.log(body);
-
       const user = await userModel.findById(req.body.id);
       let spotifyTokens = {
         access: body.access_token,
@@ -47,35 +43,39 @@ router.post('/spotify/callback', auth, async (req, res) => {
 });
 
 router.post('/spotify/refresh', auth, async (req, res) => {
-  const user = await userModel.findById(req.body.id);
-  let authOptions = {
-    url: 'https://accounts.spotify.com/api/token',
-    form: {
-      refresh_token: user.spotifyTokens.refresh,
-      grant_type: 'refresh_token'
-    },
-    headers: {
-      Authorization:
-        'Basic ' +
-        new Buffer(
-          process.env.SPOTIFY_CLIENT_ID2 +
-            ':' +
-            process.env.SPOTIFY_CLIENT_SECRET
-        ).toString('base64')
-    },
-    json: true
-  };
-
-  request.post(authOptions, async function (error, response, body) {
-    // console.log(body);
-    let spotifyTokens = {
-      access: body.access_token,
-      refresh: user.spotifyTokens.refresh
+  try {
+    const user = await userModel.findById(req.body.id);
+    let authOptions = {
+      url: 'https://accounts.spotify.com/api/token',
+      form: {
+        refresh_token: user.spotifyTokens.refresh,
+        grant_type: 'refresh_token'
+      },
+      headers: {
+        Authorization:
+          'Basic ' +
+          new Buffer(
+            process.env.SPOTIFY_CLIENT_ID2 +
+              ':' +
+              process.env.SPOTIFY_CLIENT_SECRET
+          ).toString('base64')
+      },
+      json: true
     };
-    await user.updateOne({ spotifyTokens: spotifyTokens });
-    console.log('new access token added to user');
-    res.status(200).json({ access_token: body.access_token });
-  });
+
+    request.post(authOptions, async function (error, response, body) {
+      console.log(body);
+      let spotifyTokens = {
+        access: body.access_token,
+        refresh: user.spotifyTokens.refresh
+      };
+      await user.updateOne({ spotifyTokens: spotifyTokens });
+      console.log('new access token added to user');
+      res.status(200).json({ access_token: body.access_token });
+    });
+  } catch (err) {
+    res.status(500).send('There was a problem with the refresh token request.');
+  }
 });
 
 module.exports = router;
