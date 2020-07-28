@@ -14,17 +14,13 @@ router.post('/login', async (req, res) => {
     let user = await userModel.findOne({ username });
 
     if (!user) {
-      return res
-        .status(400)
-        .json({ errors: [{ msg: 'Invalid credentials (username)' }] });
+      return res.status(400).send({ msg: 'Invalid credentials (username)' });
     }
 
     //compare entered password to the stored hash password of a found user
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res
-        .status(400)
-        .json({ errors: [{ msg: 'Invalid credentials (password)' }] });
+      return res.status(400).send({ msg: 'Invalid credentials (password)' });
     }
 
     const spotifyAuth = user.spotifyTokens.refresh ? true : false;
@@ -33,8 +29,8 @@ router.post('/login', async (req, res) => {
     const _id = user.id;
     const payload = {
       user: {
-        id: _id,
-      },
+        id: _id
+      }
     };
 
     jwt.sign(
@@ -46,9 +42,10 @@ router.post('/login', async (req, res) => {
         return res.json({ token, _id, recipes, spotifyAuth });
       }
     );
-  } catch (error) {
+  } catch (err) {
+    console.log(err);
     console.log('there was an error');
-    res.status(500).send(error.message);
+    res.status(500).send({ msg: err.message });
   }
 });
 
@@ -59,14 +56,12 @@ router.post('/register', async (req, res) => {
   try {
     let check = await userModel.findOne({ username });
     if (check) {
-      return res
-        .status(400)
-        .json({ errors: [{ msg: 'username already taken' }] });
+      return res.status(400).send({ msg: 'username already taken' });
     }
-    console.log(password.length);
+
     //backend validation for password length
     if (password.length < 6) {
-      return res.status(400).send('Password is too short');
+      return res.status(400).send({ msg: 'Password is too short' });
     }
 
     const salt = await bcrypt.genSalt(10); //create salt for password
@@ -74,7 +69,7 @@ router.post('/register', async (req, res) => {
       username,
       password,
       recipes,
-      spotifyTokens: { access: '', refresh: '' },
+      spotifyTokens: { access: '', refresh: '' }
     });
     user.password = await bcrypt.hash(password, salt);
 
@@ -82,8 +77,8 @@ router.post('/register', async (req, res) => {
     const _id = user.id;
     const payload = {
       user: {
-        id: _id,
-      },
+        id: _id
+      }
     };
 
     jwt.sign(
@@ -99,7 +94,7 @@ router.post('/register', async (req, res) => {
     // res.send(user);
   } catch (err) {
     console.log('there was an error in creating user');
-    res.status(500).send(err.message);
+    res.status(500).send({ msg: err.message });
   }
 });
 
@@ -121,12 +116,12 @@ router.post('/tokenIsValid', async (req, res) => {
       token,
       _id: user._id,
       recipes: user.recipes,
-      spotifyAuth,
+      spotifyAuth
     };
     let isUser = true;
     return res.json(userObject);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).send({ msg: err.message });
   }
 });
 

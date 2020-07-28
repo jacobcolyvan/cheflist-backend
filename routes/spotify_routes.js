@@ -5,9 +5,6 @@ const request = require('request');
 const auth = require('../middleware/auth');
 const userModel = require('../models/user');
 
-// let SpotifyWebApi = require('spotify-web-api-node');
-// let spotifyApi = new SpotifyWebApi(credentials);
-
 router.post('/spotify/callback', auth, async (req, res) => {
   try {
     let code = req.body.code || null;
@@ -70,10 +67,7 @@ router.post('/spotify/refresh', auth, async (req, res) => {
   };
 
   request.post(authOptions, async function (error, response, body) {
-    console.log('–––');
-    console.log(body);
-
-    console.log(req.body.id);
+    // console.log(body);
     let spotifyTokens = {
       access: body.access_token,
       refresh: user.spotifyTokens.refresh
