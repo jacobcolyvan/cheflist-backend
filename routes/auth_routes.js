@@ -1,11 +1,8 @@
 const express = require('express');
 const router = express.Router();
-// const auth = require('../middleware/auth');
 const userModel = require('../models/user');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const request = require('request');
-const user = require('../models/user');
 
 // authenticate user and get json web token
 router.post('/login', async (req, res) => {
