@@ -14,7 +14,7 @@ app.use(cors());
 
 mongoose.connect(process.env.MONGODB_CONNECTION_STRING, {
   useNewUrlParser: true,
-  useUnifiedTopology: true
+  useUnifiedTopology: true,
 });
 
 // app.use((req, res, next) => {
@@ -30,6 +30,6 @@ app.use(devRouter);
 app.use('/auth', require('./routes/auth_routes'));
 app.use(spotifyRouter);
 
-app.listen(process.env.PORT, () => {
+app.listen(process.env.PORT || 3000, () => {
   console.log(`Servers running on port ${process.env.PORT}`);
 });

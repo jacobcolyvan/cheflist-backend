@@ -42,7 +42,8 @@ router.post('/login', async (req, res) => {
         return res.json({ token, _id, recipes, spotifyAuth });
       }
     );
-  } catch (error) {
+  } catch (err) {
+    console.log(err);
     console.log('there was an error');
     res.status(500).send(error.msg);
   }
@@ -92,7 +93,7 @@ router.post('/register', async (req, res) => {
     // res.send(user);
   } catch (err) {
     console.log('there was an error in creating user');
-    res.status(500).send(err);
+    res.status(500).send(err.message);
   }
 });
 
@@ -119,7 +120,7 @@ router.post('/tokenIsValid', async (req, res) => {
     let isUser = true;
     return res.json(userObject);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).send({ msg: err.message });
   }
 });
 
