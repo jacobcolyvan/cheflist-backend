@@ -1,22 +1,26 @@
 const request = require('supertest');
 const app = require('../server');
 
-describe('GET /users', function () {
+// A set of tests that test basic auth/user routes using Mocha and Supertest
+
+// Tests get all users dev route
+describe('GET /dev/users (dev route)', function () {
   it('respond with json containing a list of all users', function (done) {
     request(app)
-      .get('/users')
+      .get('/dev/users')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200, done);
   });
 });
 
+// Tests login, with errors returned
 describe('POST /auth/login – login attempts', function () {
   const correctLogin = {
     username: '100',
     password: '100100'
   };
-
+  // successful login
   it('respond with userData on successful login', function (done) {
     request(app)
       .post('/auth/login')
@@ -30,6 +34,7 @@ describe('POST /auth/login – login attempts', function () {
       });
   });
 
+  // incorrect username test
   const incorrectUser = {
     username: '200',
     password: '100100'
@@ -47,6 +52,7 @@ describe('POST /auth/login – login attempts', function () {
       });
   });
 
+  // incorrect password test
   const incorrectPass = {
     username: '100',
     password: '200200'
@@ -65,35 +71,37 @@ describe('POST /auth/login – login attempts', function () {
   });
 });
 
-// describe('POST /auth/register', function () {
-//   let data = {
-//     username: 'testing1',
-//     password: '100100'
-//   };
+// Test register user route, w/ errors
+describe('POST /auth/register (with errors)', function () {
+  // // Correct register (assuming not a existing user or password is too short)
+  //   let data= {
+  //     username: 'testing1',
+  //     password: '100100'
+  //   };
 
-//   it('respond with "user created', function (done) {
-//     request(app)
-//       .post('/auth/login')
-//       .send(data)
-//       .set('Accept', 'application/json')
-//       .expect('user created')
-//       .expect(200)
-//       .end((err) => {
-//         if (err) return done(err.response);
-//         done();
-//       });
-//   });
-// });
+  //   it('respond with "user created', function (done) {
+  //     request(app)
+  //       .post('/auth/login')
+  //       .send(data)
+  //       .set('Accept', 'application/json')
+  //       .expect('user created')
+  //       .expect(200)
+  //       .end((err) => {
+  //         if (err) return done(err.response);
+  //         done();
+  //       });
+  //   });
+  // });
 
-describe('POST /auth/register (errors)', function () {
-  let data = {
+  // Existing user error test
+  let data2 = {
     username: '100',
     password: '100100'
   };
   it('respond with "Username already taken"', function (done) {
     request(app)
       .post('/auth/login')
-      .send(data)
+      .send(data2)
       .set('Accept', 'application/json')
       .expect({ msg: 'Username already taken' })
       .expect(400)
@@ -103,7 +111,8 @@ describe('POST /auth/register (errors)', function () {
       });
   });
 
-  let data2 = {
+  // Password is too short error test
+  let data3 = {
     username: 'testing2',
     password: '100'
   };
@@ -129,8 +138,8 @@ describe('POST /auth/tokenIsValid', function () {
   let token = '';
   const wrongToken = 'made_up_token';
 
+  // runs once before the first test in this block
   before(function () {
-    // runs once before the first test in this block
     request(app)
       .post('/auth/login')
       .send(loginData)
@@ -140,6 +149,7 @@ describe('POST /auth/tokenIsValid', function () {
       });
   });
 
+  // Checks token is valid flow (success)
   it('returns user data when provided with successful token', function (done) {
     request(app)
       .post('/auth/tokenIsValid')
@@ -153,6 +163,7 @@ describe('POST /auth/tokenIsValid', function () {
       });
   });
 
+  // Checks token is valid flow (invalid token)
   it('returns invalid token', function (done) {
     request(app)
       .post('/auth/tokenIsValid')
@@ -162,6 +173,7 @@ describe('POST /auth/tokenIsValid', function () {
       .expect(500, done);
   });
 
+  // Checks token is valid flow (no token)
   it('returns no token', function (done) {
     request(app)
       .post('/auth/tokenIsValid')

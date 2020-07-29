@@ -114,7 +114,7 @@ router.post('/tokenIsValid', async (req, res) => {
       spotifyAuth
     };
     let isUser = true;
-    return res.status(200).json(userObject);
+    return res.status(200).send(userObject);
   } catch (err) {
     res.status(500).send({ msg: err.message });
   }

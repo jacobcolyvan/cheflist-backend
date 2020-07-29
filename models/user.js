@@ -1,12 +1,11 @@
 const mongoose = require('mongoose');
-const { stringify } = require('querystring');
 const Schema = mongoose.Schema;
 
+// This creates the user schema, where all our user data is held
 const User = new Schema({
   username: {
     type: String,
     required: true
-    // match: [/\S+@\S+\.\S+/, 'is invalid']
   },
   password: { type: String, required: true, minlength: 6 },
   recipes: [
@@ -65,7 +64,7 @@ const User = new Schema({
       },
       playlistRef: {
         type: String,
-        default: '7jDnWwQfQYZx2bkqdSlf3F'
+        default: ''
       },
       cookingTime: {
         type: String,

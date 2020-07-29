@@ -1,35 +1,34 @@
+// Declare the routes we're going to use
 const express = require('express');
 const mongoose = require('mongoose');
+const cors = require('cors');
+
+// Declare the routes we are going to use
 const userRouter = require('./routes/user_routes.js');
 const spotifyRouter = require('./routes/spotify_routes.js');
 const devRouter = require('./routes/dev_routes.js');
-const cors = require('cors');
+const authRouter = require('./routes/auth_routes');
 
+// Tells the app to read from the .env file inr the root folder
 require('dotenv').config({ path: './.env' });
-// console.log(process.env.SPOTIFY_CLIENT_ID2);
 
 const app = express();
 app.use(express.json()); //init middleware
 app.use(cors());
 
+// Connect to mongoose db
 mongoose.connect(process.env.MONGODB_CONNECTION_STRING, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 });
 
-// app.use((req, res, next) => {
-//   res.header('Access-Control-Allow-Origin', '*');
-//   console.log(res);
-//   console.log("cors");
-//   next();
-// });
+// Tells express where to use the routes we've declared earlier
+app.use('/users', userRouter);
+app.use('/auth', authRouter);
+app.use('/spotify', spotifyRouter);
+app.use('/dev/users', devRouter);
 
-app.use(userRouter);
-app.use(devRouter);
-//Defining route for auth
-app.use('/auth', require('./routes/auth_routes'));
-app.use(spotifyRouter);
-
+// Tell our server to startup
 app.listen(process.env.PORT || 3000, () => {
   console.log(`Servers running on port ${process.env.PORT}`);
 });
