@@ -6,7 +6,7 @@ const userModel = require('../models/user');
 router.get('/users', async (req, res) => {
   const users = await userModel.find({});
   try {
-    res.send(users);
+    res.status(200).send(users);
   } catch (err) {
     console.log('there was an error');
     res.status(500).send(err);
@@ -17,7 +17,7 @@ router.get('/users/:id', async (req, res) => {
   try {
     const user = await userModel.findById(req.params.id);
     // if (!user) res.status(404).send("No user here")
-    res.send(user);
+    res.status(200).send(user);
   } catch {
     res.status(500).send(err);
     console.log('Not a valid user');

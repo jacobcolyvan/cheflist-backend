@@ -11,7 +11,7 @@ router.get('/user', auth, async (req, res) => {
     res.json({
       username: user.username,
       user: user.id,
-      recipes: user.recipes,
+      recipes: user.recipes
     });
   } catch {
     res.status(500).send(err);
