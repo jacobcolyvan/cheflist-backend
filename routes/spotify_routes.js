@@ -60,6 +60,7 @@ router.post('/callback', auth, async (req, res) => {
 // to request a new access token
 router.post('/refresh', auth, async (req, res) => {
   try {
+    const user = await userModel.findById(req.body.id);
     // Set refresh token auth/request options
     let authOptions = {
       method: 'post',
@@ -79,20 +80,19 @@ router.post('/refresh', auth, async (req, res) => {
         'Content-Type': 'application/x-www-form-urlencoded'
       }
     };
-    // Make Spotify req. and find user
+    // Make Spotify req., and add new access token to user
     const spotifyRes = await axios(authOptions);
-    const user = await userModel.findById(req.body.id);
 
     let spotifyTokens = {
       access: spotifyRes.data.access_token,
       refresh: user.spotifyTokens.refresh
     };
 
-    // Add new access token to user
     await user.updateOne({ spotifyTokens: spotifyTokens });
     console.log('new access token added to user');
     res.status(200).send({ access_token: spotifyTokens.access });
   } catch (err) {
+    console.log(err.message);
     res.status(500).send('There was a problem with the refresh token request.');
   }
 });

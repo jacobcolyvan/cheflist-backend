@@ -18,6 +18,7 @@ router.delete('/:id', auth, async (req, res) => {
     const user = await userModel.findByIdAndDelete(req.params.id);
 
     if (!user) res.status(400).send('No user here');
+    console.log('user deleted');
     res.status(200).send('User has been deleted');
   } catch (err) {
     res.status(500).send(err.message);
