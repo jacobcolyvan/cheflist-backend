@@ -36,7 +36,7 @@ router.post('/login', async (req, res) => {
       { expiresIn: 360000 },
       (err, token) => {
         if (err) throw err;
-        return res.json({ token, _id, recipes, spotifyAuth });
+        return res.status(200).json({ token, _id, recipes, spotifyAuth });
       }
     );
   } catch (err) {
@@ -53,7 +53,7 @@ router.post('/register', async (req, res) => {
   try {
     let check = await userModel.findOne({ username });
     if (check) {
-      return res.status(400).send({ msg: 'username already taken' });
+      return res.status(400).send({ msg: 'Username already taken' });
     }
     //backend validation for password length
     if (password.length < 6) {
@@ -83,13 +83,13 @@ router.post('/register', async (req, res) => {
       { expiresIn: 360000 },
       (err, token) => {
         if (err) throw err;
-        res.json('user created');
+        res.status(200).send('user created');
       }
     );
 
     // res.send(user);
   } catch (err) {
-    console.log('there was an error in creating user');
+    console.log();
     res.status(500).send(err.message);
   }
 });
@@ -97,15 +97,14 @@ router.post('/register', async (req, res) => {
 router.post('/tokenIsValid', async (req, res) => {
   try {
     const token = req.header('x-auth-token');
-    if (!token) return res.json(false);
+    if (!token) return res.status(400).send({ msg: 'no token' });
 
     const verified = jwt.verify(token, process.env.JWT_SECRET);
-    if (!verified) return res.json(false);
+    if (!verified) return res.status(400).send({ msg: 'invalid token' });
 
     const user = await userModel.findById(verified.user.id);
+    if (!user) return res.status(400).send({ msg: 'inavlid token' });
     const spotifyAuth = user.spotifyTokens.refresh ? true : false;
-    console.log(spotifyAuth);
-    if (!user) return res.json(false);
 
     userObject = {
       isUser: true,
@@ -115,7 +114,7 @@ router.post('/tokenIsValid', async (req, res) => {
       spotifyAuth
     };
     let isUser = true;
-    return res.json(userObject);
+    return res.status(200).send(userObject);
   } catch (err) {
     res.status(500).send({ msg: err.message });
   }
