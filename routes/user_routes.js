@@ -3,7 +3,6 @@ const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');
 const bcrypt = require('bcryptjs');
-
 // Declare the user-model we're using
 const userModel = require('../models/user');
 
@@ -27,54 +26,51 @@ router.delete('/:id', auth, async (req, res) => {
 
 // Update/edit an existing account's password and username
 router.put('/:id', auth, async (req, res) => {
-  // Find user by id in request
-  const user = await userModel.findById(req.params.id);
-
-  // Logic for updating username
-  if (req.body.newUsername) {
-    try {
+  try {
+    // Find user by id in request
+    const user = await userModel.findById(req.params.id);
+    // Logic for updating username
+    if (req.body.newUsername) {
       // Only update if newUsername does not match current
       if (req.body.newUsername !== user.username) {
-        await user.update({ username: req.body.newUsername });
+        await user.updateOne({ username: req.body.newUsername });
         return res
           .status(200)
           .send(`Username has been updated to ${req.body.newUsername}`);
       } else {
-        return res.status(400).send('Could not update username');
+        throw 'Please provide a new username';
       }
-    } catch (error) {
-      return res.status(500).send('Could not update username');
     }
-  }
 
-  // Logic for updating password and encrypting it
-  try {
-    // If password is at least 6 characters update password
-    if (req.body.newPassword && req.body.newPassword.length > 5) {
-      // Check if current password in req is the same as the current
-      const isMatch = await bcrypt.compare(
-        req.body.currentPassword,
-        user.password
-      );
+    // Logic for updating password and encrypting it
+    if (req.body.newPassword) {
+      if (req.body.newPassword.length > 5) {
+        // Check if current password in req is the same as the current
+        const isMatch = await bcrypt.compare(
+          req.body.currentPassword,
+          user.password
+        );
 
-      // Only proceed if current password is a match
-      if (!isMatch) {
-        console.log('Current password does not match');
-        res.status(400).send('Current password does not match');
+        // Only proceed if current password is a match
+        if (!isMatch) {
+          console.log('Current password does not match');
+          res.status(400).send('Current password does not match');
+        } else {
+          // hash the new password and update the user
+          const salt = await bcrypt.genSalt(10);
+          req.body.newPassword = await bcrypt.hash(req.body.newPassword, salt);
+
+          await user.update({ password: req.body.newPassword });
+          console.log('Password has been updated');
+          res.status(200).send('Password has been updated');
+        }
       } else {
-        // hash the new password and update the user
-        const salt = await bcrypt.genSalt(10);
-        req.body.newPassword = await bcrypt.hash(req.body.newPassword, salt);
-
-        await user.update({ password: req.body.newPassword });
-        console.log('Password has been updated');
-        res.status(200).send('Password has been updated');
+        throw 'New Password does not meet requirements';
       }
-    } else {
-      throw 'New Password does not meet requirements';
     }
-  } catch (error) {
-    res.status(400).send(error.message);
+  } catch (err) {
+    console.log(err.message);
+    res.status(400).send(err);
   }
 });
 
